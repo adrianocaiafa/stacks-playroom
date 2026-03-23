@@ -113,13 +113,14 @@ function parseArg(arg: any): number | string | null {
   return repr
 }
 
-// Parse a uint field from a Clarity repr string like "(ok {dice-result: u3, won: true, ...})"
+// Parse a uint field from Clarity tuple repr: "(ok (tuple (dice-result u3) (won false) ...))"
+// Hiro uses space-separated tuples, e.g. "(field-name u3)" or "(field-name false)"
 function parseReprField(repr: string, field: string): number | null {
-  const match = repr.match(new RegExp(`${field}:\\s*u(\\d+)`))
+  const match = repr.match(new RegExp(`\\(${field}\\s+u(\\d+)\\)`))
   return match ? parseInt(match[1]) : null
 }
 
 function parseReprBool(repr: string, field: string): boolean | null {
-  const match = repr.match(new RegExp(`${field}:\\s*(true|false)`))
+  const match = repr.match(new RegExp(`\\(${field}\\s+(true|false)\\)`))
   return match ? match[1] === 'true' : null
 }
