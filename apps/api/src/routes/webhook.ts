@@ -98,8 +98,12 @@ function buildGameEvent(
   }
 
   if (gameId === 'coin-flip' && functionName === 'flip-coin') {
-    const choice = parseArg(args[0])
-    return { ...base, choice }
+    const userChoice = parseArg(args[0])
+    const result = tx.metadata?.result?.repr ?? ''
+    const coinResult = parseReprField(result, 'coin-result')
+    const won = parseReprBool(result, 'won')
+    const pointsEarned = parseReprField(result, 'points-earned')
+    return { ...base, userChoice, coinResult, won, pointsEarned }
   }
 
   // Generic fallback — broadcast the raw call so we don't miss events

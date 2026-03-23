@@ -29,4 +29,13 @@ export interface DiceRollEvent extends BaseGameEvent {
   pointsEarned: number | null;
 }
 
-export type GameEvent = DiceRollEvent | BaseGameEvent;
+export interface CoinFlipEvent extends BaseGameEvent {
+  gameId: 'coin-flip';
+  functionName: 'flip-coin';
+  userChoice: number | null;
+  coinResult: number | null;
+  won: boolean | null;
+  pointsEarned: number | null;
+}
+
+export type GameEvent = DiceRollEvent | CoinFlipEvent | BaseGameEvent;
