@@ -41,7 +41,6 @@ export function DiceResultOverlay({ userChoice, diceResult, won, txId, onClose }
   }, [onClose])
 
   const isWin = won === true
-  const isLoss = won === false
   const resultKnown = won !== null
 
   return (
