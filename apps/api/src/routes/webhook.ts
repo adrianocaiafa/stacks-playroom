@@ -46,12 +46,10 @@ webhookRouter.post('/stacks', (req, res) => {
       const transactions: any[] = block.transactions ?? block.events ?? []
 
       for (const tx of transactions) {
-        const metadata = tx.metadata ?? {}
+        // Log full tx to identify correct structure
+        console.log('[webhook] FULL TX:', JSON.stringify(tx).slice(0, 800))
 
-        // Hiro chainhook payload structure:
-        // metadata.type === 'contract_call'
-        // metadata.contract_call.contract_id
-        // metadata.contract_call.function_name
+        const metadata = tx.metadata ?? {}
         const contractCall = metadata.contract_call ?? metadata.kind?.data ?? {}
 
         const contractId: string =
