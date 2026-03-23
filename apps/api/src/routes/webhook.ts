@@ -46,6 +46,9 @@ webhookRouter.post('/stacks', (req, res) => {
       const transactions: any[] = block.transactions ?? block.events ?? []
 
       for (const tx of transactions) {
+        console.log('[webhook] tx keys:', Object.keys(tx))
+        console.log('[webhook] tx metadata:', JSON.stringify(tx.metadata ?? {}).slice(0, 400))
+
         const metadata = tx.metadata ?? {}
         const contractCall = metadata.kind?.data ?? metadata.contract_call ?? {}
 
