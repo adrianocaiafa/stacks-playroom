@@ -29,16 +29,6 @@ export const GAMES: GameMeta[] = [
     icon: '🎟️',
     tags: ['raffle', 'tickets', 'STX'],
   },
-  {
-    id: 'rock-paper-scissors',
-    title: 'Rock Paper Scissors',
-    description: 'The classic game, immortalized on-chain. Commit your move and win.',
-    category: 'luck',
-    contractKey: 'rockPaperScissors',
-    icon: '✊',
-    tags: ['rps', 'classic'],
-  },
-
   // ── Logic / Math ─────────────────────────────────────────────────────────
   {
     id: 'mastermind',
@@ -88,6 +78,15 @@ export const GAMES: GameMeta[] = [
 
   // ── Casual / Social ───────────────────────────────────────────────────────
   {
+    id: 'rock-paper-scissors',
+    title: 'Rock Paper Scissors',
+    description: 'The classic game, immortalized on-chain. Commit your move and win.',
+    category: 'casual',
+    contractKey: 'rockPaperScissors',
+    icon: '✊',
+    tags: ['rps', 'classic'],
+  },
+  {
     id: 'daily-check-in',
     title: 'Daily Check-In',
     description: 'Check in every day to build your streak and climb the leaderboard.',
@@ -95,33 +94,6 @@ export const GAMES: GameMeta[] = [
     contractKey: 'dailyCheckIn',
     icon: '📅',
     tags: ['daily', 'streak'],
-  },
-  {
-    id: 'voting-system',
-    title: 'Voting',
-    description: 'Create and participate in on-chain polls. Your vote is on the blockchain.',
-    category: 'casual',
-    contractKey: 'votingSystem',
-    icon: '🗳️',
-    tags: ['poll', 'vote', 'social'],
-  },
-  {
-    id: 'gas-meter',
-    title: 'Gas Meter',
-    description: 'Send micro-transactions to measure your on-chain activity.',
-    category: 'casual',
-    contractKey: 'gasMeter',
-    icon: '⛽',
-    tags: ['activity', 'micro-tx'],
-  },
-  {
-    id: 'tip-jar',
-    title: 'Tip Jar',
-    description: 'Send and receive tips in STX. Simple on-chain generosity.',
-    category: 'casual',
-    contractKey: 'tipJar',
-    icon: '🫙',
-    tags: ['tips', 'STX', 'social'],
   },
 
   // ── Competitive ───────────────────────────────────────────────────────────
