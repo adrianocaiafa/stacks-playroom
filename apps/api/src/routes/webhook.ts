@@ -26,43 +26,53 @@ const CONTRACT_TO_GAME: Record<string, string> = {
  * the relevant data to connected SSE clients.
  */
 webhookRouter.post('/stacks', (req, res) => {
+  // Always respond 200 immediately so Hiro doesn't retry
+  res.status(200).json({ ok: true })
+
   try {
     const payload = req.body
+    console.log('[webhook] Received payload keys:', Object.keys(payload ?? {}))
+    console.log('[webhook] Raw payload:', JSON.stringify(payload).slice(0, 500))
 
-    if (!payload?.apply || !Array.isArray(payload.apply)) {
-      res.status(400).json({ error: 'Invalid payload' })
+    const blocks = payload?.apply ?? payload?.events ?? []
+
+    if (!Array.isArray(blocks) || blocks.length === 0) {
+      console.log('[webhook] No blocks/events found in payload')
       return
     }
 
-    for (const block of payload.apply) {
-      const transactions: any[] = block.transactions ?? []
+    for (const block of blocks) {
+      const transactions: any[] = block.transactions ?? block.events ?? []
 
       for (const tx of transactions) {
         const metadata = tx.metadata ?? {}
-        const contractCall = metadata.kind?.data ?? {}
+        const contractCall = metadata.kind?.data ?? metadata.contract_call ?? {}
 
-        // Extract contract identifier
-        const contractId: string = contractCall.contract_identifier ?? ''
+        const contractId: string =
+          contractCall.contract_identifier ??
+          tx.contract_identifier ??
+          ''
+
         const [, contractName] = contractId.split('.')
-        const functionName: string = contractCall.function_name ?? ''
+        const functionName: string =
+          contractCall.function_name ??
+          tx.function_name ??
+          ''
+
+        console.log(`[webhook] tx: ${contractId}::${functionName}`)
 
         const gameId = CONTRACT_TO_GAME[contractName]
         if (!gameId) continue
 
-        // Parse function arguments (Clarity decoded values)
         const args: any[] = contractCall.function_args ?? []
-
         const event = buildGameEvent(gameId, functionName, args, tx, metadata)
         if (event) {
           broadcast(gameId, 'game-event', event)
         }
       }
     }
-
-    res.status(200).json({ ok: true })
   } catch (err) {
     console.error('[webhook] Error processing payload:', err)
-    res.status(500).json({ error: 'Internal error' })
   }
 })
 
