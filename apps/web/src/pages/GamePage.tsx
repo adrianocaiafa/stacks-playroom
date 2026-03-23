@@ -2,7 +2,7 @@ import { useParams, Navigate } from 'react-router-dom'
 import { GAMES } from '../data/games'
 import { DiceGamePage } from '../games/luck/dice-game/DiceGamePage'
 
-const GAME_COMPONENTS: Record<string, React.ComponentType> = {
+export const GAME_COMPONENTS: Record<string, React.ComponentType> = {
   'dice-game': DiceGamePage,
 }
 
