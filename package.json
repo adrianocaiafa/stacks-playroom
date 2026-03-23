@@ -1,0 +1,25 @@
+{
+  "name": "stacks-playroom",
+  "private": true,
+  "version": "0.0.0",
+  "description": "A full-stack monorepo for on-chain games built on the Stacks blockchain.",
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "test": "turbo run test",
+    "clean": "turbo run clean"
+  },
+  "workspaces": [
+    "apps/*",
+    "packages/*",
+    "contracts"
+  ],
+  "devDependencies": {
+    "turbo": "^2.5.4"
+  },
+  "packageManager": "pnpm@10.28.2",
+  "engines": {
+    "node": ">=22"
+  }
+}

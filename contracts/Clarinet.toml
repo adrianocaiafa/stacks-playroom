@@ -1,0 +1,74 @@
+[project]
+name = "stacks-playroom"
+description = "Clarity smart contracts for Stacks Playroom on-chain games"
+authors = []
+telemetry = true
+cache_dir = "./.cache"
+
+# ── Luck ──────────────────────────────────────────────────────────────────────
+
+[contracts.dice-game]
+path = "contracts/dice-game.clar"
+epoch = "latest"
+
+[contracts.coin-flip]
+path = "contracts/coin-flip.clar"
+epoch = "latest"
+
+[contracts.raffle]
+path = "contracts/raffle.clar"
+epoch = "latest"
+
+[contracts.rock-paper-scissors]
+path = "contracts/rock-paper-scissors.clar"
+epoch = "latest"
+
+# ── Logic / Math ──────────────────────────────────────────────────────────────
+
+[contracts.mastermind-v2]
+path = "contracts/mastermind-v2.clar"
+epoch = "latest"
+
+[contracts.number-guess-zen]
+path = "contracts/number-guess-zen.clar"
+epoch = "latest"
+
+[contracts.number-guess-pro]
+path = "contracts/number-guess-pro.clar"
+epoch = "latest"
+
+[contracts.hidden-formula]
+path = "contracts/hidden-formula.clar"
+epoch = "latest"
+
+[contracts.multi-target]
+path = "contracts/multi-target.clar"
+epoch = "latest"
+
+# ── Casual / Social ───────────────────────────────────────────────────────────
+
+[contracts.daily-check-in]
+path = "contracts/daily-check-in.clar"
+epoch = "latest"
+
+[contracts.voting-system]
+path = "contracts/voting-system.clar"
+epoch = "latest"
+
+[contracts.gas-meter]
+path = "contracts/gas-meter.clar"
+epoch = "latest"
+
+[contracts.tip-jar-v2]
+path = "contracts/tip-jar-v2.clar"
+epoch = "latest"
+
+# ── Competitive ───────────────────────────────────────────────────────────────
+
+[contracts.quest-system]
+path = "contracts/quest-system.clar"
+epoch = "latest"
+
+[repl.analysis]
+passes = ["check_checker"]
+check_checker = { trusted_sender = false, trusted_caller = false, callee_filter = false }
