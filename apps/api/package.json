@@ -7,6 +7,7 @@
   "scripts": {
     "dev": "tsx watch src/server.ts",
     "build": "tsc",
+    "build:railway": "cd ../.. && pnpm install --frozen-lockfile && cd apps/api && tsc",
     "start": "node dist/server.js",
     "chainhooks:register": "tsx src/chainhooks/register.ts",
     "clean": "rm -rf dist"
