@@ -5,6 +5,7 @@ import { wagmiConfig } from './config/appkit'
 import { Layout } from './components/Layout'
 import { Home } from './pages/Home'
 import { CategoryPage } from './pages/CategoryPage'
+import { GamePage } from './pages/GamePage'
 import { NotFound } from './pages/NotFound'
 
 const queryClient = new QueryClient()
@@ -18,7 +19,7 @@ function App() {
             <Routes>
               <Route path="/" element={<Home />} />
               <Route path="/games/:category" element={<CategoryPage />} />
-              <Route path="/games/:category/:gameId" element={<NotFound />} />
+              <Route path="/games/:category/:gameId" element={<GamePage />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </Layout>
