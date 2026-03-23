@@ -1,5 +1,8 @@
-import { useState } from 'react'
+import { useState, useCallback } from 'react'
 import { useStacksWallet } from '../../../hooks/useStacksWallet'
+import { useGameEvents } from '../../../hooks/useGameEvents'
+import { LiveEventToast } from '../../../components/LiveEventToast'
+import type { BaseGameEvent } from '@stacks-playroom/shared'
 import {
   useDiceGlobalStats,
   useDiceUserStats,
@@ -34,12 +37,26 @@ function RefreshButton({ onClick, loading }: { onClick: () => void; loading: boo
 export function DiceGamePage() {
   const { address } = useStacksWallet()
   const [selected, setSelected] = useState<number | null>(null)
+  const [liveEvent, setLiveEvent] = useState<BaseGameEvent | null>(null)
 
   const { stats: global, loading: globalLoading, refresh: refreshGlobal } = useDiceGlobalStats()
   const { stats: user, loading: userLoading, refresh: refreshUser } = useDiceUserStats(address)
   const { history, totalRolls, loading: histLoading, refresh: refreshHistory } = useDiceHistory(address)
   const { entries, loading: lbLoading, refresh: refreshLb } = useDiceLeaderboard()
   const { roll, rolling, txId, error } = useRollDice(address)
+
+  // SSE — refresh data when any on-chain event arrives
+  const handleLiveEvent = useCallback((event: BaseGameEvent) => {
+    setLiveEvent(event)
+    setTimeout(() => {
+      refreshGlobal()
+      refreshUser()
+      refreshHistory()
+      refreshLb()
+    }, 3000) // wait 3s for chain to settle before querying
+  }, [refreshGlobal, refreshUser, refreshHistory, refreshLb])
+
+  useGameEvents('dice-game', handleLiveEvent)
 
   const winRate =
     user && user.totalRolls > 0
@@ -49,13 +66,11 @@ export function DiceGamePage() {
   const handleRoll = async () => {
     if (selected === null) return
     await roll(selected)
-    refreshUser()
-    refreshHistory()
-    refreshGlobal()
   }
 
   return (
     <div className="max-w-5xl mx-auto space-y-8">
+      <LiveEventToast event={liveEvent} />
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-white mb-2">🎲 Dice Game</h1>
