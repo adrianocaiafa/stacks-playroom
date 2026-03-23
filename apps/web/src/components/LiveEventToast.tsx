@@ -18,7 +18,7 @@ export function LiveEventToast({ event }: Props) {
   if (!visible || !event) return null
 
   return (
-    <div className="fixed bottom-6 right-6 z-50 animate-in slide-in-from-bottom-4 duration-300">
+    <div className="fixed bottom-6 right-6 z-50 transition-all duration-300">
       <div className="bg-gray-900 border border-orange-500/30 rounded-xl px-5 py-4 shadow-xl shadow-black/40 max-w-sm">
         <div className="flex items-center gap-3">
           <span className="text-2xl">🎲</span>

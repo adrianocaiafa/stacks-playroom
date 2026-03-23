@@ -7,8 +7,19 @@ import { webhookRouter } from './routes/webhook.js'
 const app = express()
 const PORT = process.env.PORT ?? 3001
 
+const ALLOWED_ORIGINS = [
+  process.env.CORS_ORIGIN,
+  'http://localhost:5173',
+  'http://localhost:4173',
+].filter(Boolean) as string[]
+
 app.use(cors({
-  origin: process.env.CORS_ORIGIN ?? '*',
+  origin: (origin, callback) => {
+    // Allow requests with no origin (curl, Postman, server-to-server)
+    if (!origin) return callback(null, true)
+    if (ALLOWED_ORIGINS.includes(origin)) return callback(null, true)
+    callback(new Error(`CORS: origin ${origin} not allowed`))
+  },
   methods: ['GET', 'POST'],
 }))
 
