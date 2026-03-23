@@ -1,0 +1,11 @@
+{
+  "$schema": "https://railway.app/railway.schema.json",
+  "build": {
+    "buildCommand": "pnpm --filter @stacks-playroom/api build"
+  },
+  "deploy": {
+    "startCommand": "node apps/api/dist/server.js",
+    "healthcheckPath": "/health",
+    "restartPolicyType": "ON_FAILURE"
+  }
+}
