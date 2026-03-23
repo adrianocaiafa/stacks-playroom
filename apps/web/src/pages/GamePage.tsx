@@ -2,10 +2,12 @@ import { useParams, Navigate } from 'react-router-dom'
 import { GAMES } from '../data/games'
 import { DiceGamePage } from '../games/luck/dice-game/DiceGamePage'
 import { CoinFlipPage } from '../games/luck/coin-flip/CoinFlipPage'
+import { RPSPage } from '../games/casual/rock-paper-scissors/RPSPage'
 
 export const GAME_COMPONENTS: Record<string, React.ComponentType> = {
   'dice-game': DiceGamePage,
   'coin-flip': CoinFlipPage,
+  'rock-paper-scissors': RPSPage,
 }
 
 export function GamePage() {

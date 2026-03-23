@@ -38,4 +38,13 @@ export interface CoinFlipEvent extends BaseGameEvent {
   pointsEarned: number | null;
 }
 
-export type GameEvent = DiceRollEvent | CoinFlipEvent | BaseGameEvent;
+export interface RPSGameEvent extends BaseGameEvent {
+  gameId: 'rock-paper-scissors';
+  functionName: 'play-game';
+  userChoice: number | null;
+  contractChoice: number | null;
+  result: 'win' | 'loss' | 'draw' | null;
+  pointsEarned: number | null;
+}
+
+export type GameEvent = DiceRollEvent | CoinFlipEvent | RPSGameEvent | BaseGameEvent;

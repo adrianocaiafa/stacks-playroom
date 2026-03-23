@@ -106,6 +106,16 @@ function buildGameEvent(
     return { ...base, userChoice, coinResult, won, pointsEarned }
   }
 
+  if (gameId === 'rock-paper-scissors' && functionName === 'play-game') {
+    const userChoice = parseArg(args[0])
+    const result = tx.metadata?.result?.repr ?? ''
+    const contractChoice = parseReprField(result, 'contract-choice')
+    const pointsEarned = parseReprField(result, 'points-earned')
+    // result field is a string-ascii: "win", "loss", or "draw"
+    const gameResult = parseReprStringAscii(result, 'result')
+    return { ...base, userChoice, contractChoice, result: gameResult, pointsEarned }
+  }
+
   // Generic fallback — broadcast the raw call so we don't miss events
   return { ...base }
 }
@@ -127,4 +137,10 @@ function parseReprField(repr: string, field: string): number | null {
 function parseReprBool(repr: string, field: string): boolean | null {
   const match = repr.match(new RegExp(`\\(${field}\\s+(true|false)\\)`))
   return match ? match[1] === 'true' : null
+}
+
+// Parse a string-ascii field: (result "win") → "win"
+function parseReprStringAscii(repr: string, field: string): string | null {
+  const match = repr.match(new RegExp(`\\(${field}\\s+"([^"]+)"\\)`))
+  return match ? match[1] : null
 }
