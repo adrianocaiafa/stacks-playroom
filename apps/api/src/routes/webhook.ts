@@ -34,7 +34,8 @@ webhookRouter.post('/stacks', (req, res) => {
     console.log('[webhook] Received payload keys:', Object.keys(payload ?? {}))
     console.log('[webhook] Raw payload:', JSON.stringify(payload).slice(0, 500))
 
-    const blocks = payload?.apply ?? payload?.events ?? []
+    // Hiro payload structure: { chainhook: {...}, event: { apply: [...] } }
+    const blocks = payload?.event?.apply ?? payload?.apply ?? []
 
     if (!Array.isArray(blocks) || blocks.length === 0) {
       console.log('[webhook] No blocks/events found in payload')
