@@ -68,8 +68,9 @@ export function DiceGamePage() {
     refreshAll()
 
     const diceEvent = event as DiceRollEvent
-    // txId from useRollDice is the pending tx the user submitted
-    if (txId && event.txId.toLowerCase() === txId.toLowerCase()) {
+    // Normalize both IDs — @stacks/connect omits '0x', Hiro includes it
+    const normalize = (id: string) => id.replace(/^0x/i, '').toLowerCase()
+    if (txId && normalize(event.txId) === normalize(txId)) {
       setOverlay({
         txId: event.txId,
         userChoice: diceEvent.userChoice ?? null,

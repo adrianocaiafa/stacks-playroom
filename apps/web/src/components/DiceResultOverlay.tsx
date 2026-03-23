@@ -10,21 +10,23 @@ interface DiceResultOverlayProps {
 
 const DICE_FACES = ['', '⚀', '⚁', '⚂', '⚃', '⚄', '⚅']
 
-function RandomDice({ final, delay = 0 }: { final: number | null; delay?: number }) {
-  const [shown, setShown] = useState(Math.ceil(Math.random() * 6))
+function RollingDice({ final }: { final: number | null }) {
+  const [shown, setShown] = useState(() => Math.ceil(Math.random() * 6))
 
   useEffect(() => {
-    let i = 0
+    let count = 0
+    const max = 14
     const interval = setInterval(() => {
-      setShown(Math.ceil(Math.random() * 6))
-      i++
-      if (i > 10 + delay) {
+      count++
+      if (count >= max) {
         clearInterval(interval)
         setShown(final ?? Math.ceil(Math.random() * 6))
+      } else {
+        setShown(Math.ceil(Math.random() * 6))
       }
-    }, 80)
+    }, 75)
     return () => clearInterval(interval)
-  }, [final, delay])
+  }, [final])
 
   return <span>{DICE_FACES[shown]}</span>
 }
@@ -33,80 +35,107 @@ export function DiceResultOverlay({ userChoice, diceResult, won, txId, onClose }
   const [phase, setPhase] = useState<'rolling' | 'result'>('rolling')
 
   useEffect(() => {
-    const t1 = setTimeout(() => setPhase('result'), 1400)
-    const t2 = setTimeout(() => onClose(), 6000)
+    const t1 = setTimeout(() => setPhase('result'), 1500)
+    const t2 = setTimeout(() => onClose(), 7000)
     return () => { clearTimeout(t1); clearTimeout(t2) }
   }, [onClose])
 
+  const isWin = won === true
+  const isLoss = won === false
+  const resultKnown = won !== null
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/85 backdrop-blur-md"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-md"
       onClick={phase === 'result' ? onClose : undefined}
     >
       <div
-        className="relative text-center px-10 py-10 bg-gray-950 border border-gray-800 rounded-2xl shadow-2xl w-[380px]"
+        className="relative text-center px-8 py-8 bg-gray-950 border border-gray-800 rounded-2xl shadow-2xl max-w-sm w-full mx-4"
         onClick={(e) => e.stopPropagation()}
+        style={
+          phase === 'result' && resultKnown
+            ? { boxShadow: isWin
+                ? '0 0 60px rgba(34,197,94,0.3), 0 0 120px rgba(34,197,94,0.1)'
+                : '0 0 60px rgba(239,68,68,0.25), 0 0 120px rgba(239,68,68,0.08)' }
+            : undefined
+        }
       >
         {phase === 'rolling' ? (
-          <div>
-            <p className="text-gray-400 text-sm uppercase tracking-widest mb-4">Rolling the dice...</p>
-            <p className="text-9xl">
-              <RandomDice final={diceResult} />
+          /* ── Rolling phase ───────────────────────────────── */
+          <div className="py-4">
+            <p className="text-xs text-gray-500 uppercase tracking-widest mb-5">Rolling the dice</p>
+            <p className="text-9xl leading-none">
+              <RollingDice final={diceResult} />
             </p>
-            <p className="text-gray-600 text-sm mt-4 animate-pulse">Waiting for result</p>
+            <div className="flex justify-center gap-1 mt-6">
+              {[0, 1, 2].map((i) => (
+                <span
+                  key={i}
+                  className="w-1.5 h-1.5 rounded-full bg-gray-600 animate-pulse"
+                  style={{ animationDelay: `${i * 200}ms` }}
+                />
+              ))}
+            </div>
           </div>
         ) : (
+          /* ── Result phase ────────────────────────────────── */
           <div>
-            {/* Outcome glow ring */}
-            <div className={`absolute inset-0 rounded-2xl pointer-events-none ${
-              won
-                ? 'shadow-[0_0_60px_rgba(34,197,94,0.25)]'
-                : 'shadow-[0_0_60px_rgba(239,68,68,0.2)]'
-            }`} />
-
-            {/* Dice comparison */}
+            {/* Dice comparison row */}
             <div className="flex items-center justify-center gap-6 mb-6">
               <div className="text-center">
-                <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-2">You chose</p>
-                <p className="text-6xl">{DICE_FACES[userChoice ?? 1]}</p>
-                <p className="text-gray-500 text-sm mt-1">{userChoice}</p>
+                <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-2">Your pick</p>
+                <p className="text-6xl leading-none">{DICE_FACES[userChoice ?? 1]}</p>
+                <p className="text-gray-600 text-xs mt-1">{userChoice ?? '?'}</p>
               </div>
 
-              <p className="text-3xl text-gray-700 mb-2">vs</p>
+              <p className="text-2xl text-gray-700 mt-1">vs</p>
 
               <div className="text-center">
                 <p className="text-[10px] text-gray-600 uppercase tracking-widest mb-2">Dice rolled</p>
-                <p className={`text-6xl transition-all ${
-                  won
-                    ? 'drop-shadow-[0_0_16px_rgba(34,197,94,0.9)]'
-                    : 'drop-shadow-[0_0_16px_rgba(239,68,68,0.7)]'
-                }`}>
-                  {DICE_FACES[diceResult ?? 1]}
+                <p
+                  className="text-6xl leading-none"
+                  style={resultKnown ? {
+                    filter: isWin
+                      ? 'drop-shadow(0 0 14px rgba(34,197,94,0.9))'
+                      : 'drop-shadow(0 0 14px rgba(239,68,68,0.7))',
+                  } : undefined}
+                >
+                  {diceResult ? DICE_FACES[diceResult] : '🎲'}
                 </p>
-                <p className="text-gray-500 text-sm mt-1">{diceResult}</p>
+                <p className="text-gray-600 text-xs mt-1">{diceResult ?? '?'}</p>
               </div>
             </div>
 
-            {/* Win / Lose banner */}
-            <div className={`rounded-xl py-4 px-5 mb-5 ${
-              won
-                ? 'bg-green-500/10 border border-green-500/25'
-                : 'bg-red-500/8 border border-red-500/20'
-            }`}>
-              {won ? (
-                <>
-                  <p className="text-4xl font-black text-green-400 tracking-tight">YOU WON! 🎉</p>
-                  <p className="text-green-600 mt-1 text-sm">+10 points earned</p>
-                </>
-              ) : (
-                <>
-                  <p className="text-4xl font-black text-red-400 tracking-tight">NICE TRY</p>
-                  <p className="text-gray-600 mt-1 text-sm">Better luck next roll</p>
-                </>
-              )}
-            </div>
+            {/* Outcome banner */}
+            {resultKnown ? (
+              <div
+                className={`rounded-xl py-4 px-5 mb-5 border ${
+                  isWin
+                    ? 'bg-green-950/60 border-green-700/30'
+                    : 'bg-red-950/60 border-red-700/20'
+                }`}
+              >
+                {isWin ? (
+                  <>
+                    <p className="text-4xl font-black text-green-400 tracking-tight">YOU WON!</p>
+                    <p className="text-green-600 text-sm mt-1">+10 points 🎉</p>
+                  </>
+                ) : (
+                  <>
+                    <p className="text-4xl font-black text-red-400 tracking-tight">NICE TRY</p>
+                    <p className="text-gray-600 text-sm mt-1">Better luck next roll</p>
+                  </>
+                )}
+              </div>
+            ) : (
+              /* result not yet parsed — still show something */
+              <div className="rounded-xl py-4 px-5 mb-5 border border-gray-800 bg-gray-900">
+                <p className="text-3xl font-black text-gray-300">Roll confirmed ✓</p>
+                <p className="text-gray-600 text-sm mt-1">Checking result on-chain…</p>
+              </div>
+            )}
 
-            {/* TX + close */}
+            {/* Bottom row */}
             <div className="flex items-center justify-between">
               {txId ? (
                 <a
@@ -115,7 +144,7 @@ export function DiceResultOverlay({ userChoice, diceResult, won, txId, onClose }
                   rel="noreferrer"
                   className="text-xs text-gray-700 hover:text-orange-400 transition"
                 >
-                  view on explorer →
+                  explorer →
                 </a>
               ) : <span />}
               <button

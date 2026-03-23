@@ -31,8 +31,7 @@ webhookRouter.post('/stacks', (req, res) => {
 
   try {
     const payload = req.body
-    console.log('[webhook] Received payload keys:', Object.keys(payload ?? {}))
-    console.log('[webhook] Raw payload:', JSON.stringify(payload).slice(0, 500))
+    console.log('[webhook] Received — chainhook:', payload?.chainhook?.name)
 
     // Hiro payload structure: { chainhook: {...}, event: { apply: [...] } }
     const blocks = payload?.event?.apply ?? payload?.apply ?? []
@@ -58,13 +57,15 @@ webhookRouter.post('/stacks', (req, res) => {
 
         const [, contractName] = contractId.split('.')
 
-        console.log(`[webhook] tx: ${contractId}::${functionName} by ${sender}`)
+        const resultRepr: string = tx.metadata?.result?.repr ?? ''
+        console.log(`[webhook] tx: ${contractId}::${functionName} by ${sender} | result: ${resultRepr.slice(0, 120)}`)
 
         const gameId = CONTRACT_TO_GAME[contractName]
-        if (!gameId) continue
+        if (!gameId) { console.log(`[webhook] unknown contract: ${contractName}`); continue }
 
         const event = buildGameEvent(gameId, functionName, args, tx, sender)
         if (event) {
+          console.log(`[webhook] broadcasting to ${gameId}:`, JSON.stringify(event))
           broadcast(gameId, 'game-event', event)
         }
       }

@@ -137,7 +137,7 @@ export function useDiceHistory(address: string | null) {
   const [loading, setLoading] = useState(false)
 
   const fetch = useCallback(async () => {
-    if (!address) { setHistory([]); return }
+    if (!address) { setHistory([]); setTotalRolls(0); return }
     setLoading(true)
     try {
       const net = getNetwork()
@@ -179,7 +179,7 @@ export function useDiceHistory(address: string | null) {
       }
       setHistory(entries)
     } catch {
-      setHistory([])
+      // keep existing data on error — don't wipe the list
     } finally {
       setLoading(false)
     }
@@ -234,7 +234,7 @@ export function useDiceLeaderboard() {
       list.sort((a, b) => b.totalPoints - a.totalPoints || b.wins - a.wins)
       setEntries(list)
     } catch {
-      setEntries([])
+      // keep existing data on error — don't wipe the list
     } finally {
       setLoading(false)
     }
