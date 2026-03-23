@@ -46,27 +46,24 @@ webhookRouter.post('/stacks', (req, res) => {
       const transactions: any[] = block.transactions ?? block.events ?? []
 
       for (const tx of transactions) {
-        // Log full tx to identify correct structure
-        console.log('[webhook] FULL TX:', JSON.stringify(tx).slice(0, 800))
+        // Contract call data is in tx.operations[], the item with type === 'contract_call'
+        const operations: any[] = tx.operations ?? []
+        const contractOp = operations.find((op: any) => op.type === 'contract_call')
+        if (!contractOp) continue
 
-        const metadata = tx.metadata ?? {}
-        const contractCall = metadata.contract_call ?? metadata.kind?.data ?? {}
-
-        const contractId: string =
-          contractCall.contract_id ??
-          contractCall.contract_identifier ??
-          ''
+        const contractId: string = contractOp.metadata?.contract_identifier ?? ''
+        const functionName: string = contractOp.metadata?.function_name ?? ''
+        const args: any[] = contractOp.metadata?.args ?? []
+        const sender: string = contractOp.account?.address ?? tx.metadata?.sender ?? ''
 
         const [, contractName] = contractId.split('.')
-        const functionName: string = contractCall.function_name ?? ''
 
-        console.log(`[webhook] tx: ${contractId}::${functionName}`)
+        console.log(`[webhook] tx: ${contractId}::${functionName} by ${sender}`)
 
         const gameId = CONTRACT_TO_GAME[contractName]
         if (!gameId) continue
 
-        const args: any[] = contractCall.function_args ?? []
-        const event = buildGameEvent(gameId, functionName, args, tx, metadata)
+        const event = buildGameEvent(gameId, functionName, args, tx, sender)
         if (event) {
           broadcast(gameId, 'game-event', event)
         }
@@ -82,11 +79,10 @@ function buildGameEvent(
   functionName: string,
   args: any[],
   tx: any,
-  metadata: any,
+  sender: string,
 ): object | null {
   const txId: string = tx.transaction_identifier?.hash ?? ''
-  const sender: string = metadata.sender ?? ''
-  const success: boolean = metadata.success ?? false
+  const success: boolean = tx.metadata?.status === 'success'
 
   const base = { txId, sender, success, gameId, functionName }
 
@@ -107,7 +103,8 @@ function buildGameEvent(
 
 function parseArg(arg: any): number | string | null {
   if (!arg) return null
-  const val = arg.repr ?? arg.value ?? arg
-  if (typeof val === 'string' && val.startsWith('u')) return parseInt(val.slice(1))
-  return val
+  // args format: { name, repr: "u3", type: "uint" }
+  const repr: string = arg.repr ?? arg.value ?? String(arg)
+  if (repr.startsWith('u')) return parseInt(repr.slice(1))
+  return repr
 }
