@@ -1,7 +1,7 @@
 {
   "$schema": "https://railway.app/railway.schema.json",
   "build": {
-    "buildCommand": "pnpm --filter @stacks-playroom/api build"
+    "buildCommand": "pnpm --filter @stacks-playroom/shared build && pnpm --filter @stacks-playroom/api build"
   },
   "deploy": {
     "startCommand": "node apps/api/dist/server.js",
