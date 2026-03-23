@@ -52,7 +52,7 @@ export function DiceGamePage() {
   const { stats: user, loading: userLoading, refresh: refreshUser } = useDiceUserStats(address)
   const { history, totalRolls, loading: histLoading, refresh: refreshHistory } = useDiceHistory(address)
   const { entries, loading: lbLoading, refresh: refreshLb } = useDiceLeaderboard()
-  const { roll, rolling, txId, error } = useRollDice(address)
+  const { roll, rolling, txId, error, clearPendingTx } = useRollDice(address)
 
   const refreshAll = useCallback(() => {
     setTimeout(() => {
@@ -103,7 +103,7 @@ export function DiceGamePage() {
           diceResult={overlay.diceResult}
           won={overlay.won}
           txId={overlay.txId}
-          onClose={() => setOverlay(null)}
+          onClose={() => { setOverlay(null); clearPendingTx() }}
         />
       )}
       {/* Header */}
@@ -153,15 +153,19 @@ export function DiceGamePage() {
           )}
 
           {txId && (
-            <div className="bg-green-500/10 border border-green-500/20 rounded-lg p-3 mb-3">
-              <p className="text-green-400 text-sm font-medium">Transaction submitted!</p>
+            <div className="bg-orange-500/10 border border-orange-500/20 rounded-lg p-3 mb-3">
+              <div className="flex items-center gap-2 mb-1">
+                <span className="w-2 h-2 rounded-full bg-orange-400 animate-pulse" />
+                <p className="text-orange-400 text-sm font-medium">Waiting for confirmation…</p>
+              </div>
+              <p className="text-xs text-gray-600">The result overlay will appear automatically when the block confirms.</p>
               <a
-                href={`https://explorer.stacks.co/txid/${txId}`}
+                href={`https://explorer.stacks.co/txid/${txId}?chain=mainnet`}
                 target="_blank"
                 rel="noreferrer"
-                className="text-xs text-green-500 hover:underline break-all"
+                className="text-xs text-orange-600 hover:text-orange-400 hover:underline break-all mt-1 block"
               >
-                {txId}
+                {txId.slice(0, 20)}…{txId.slice(-8)}
               </a>
             </div>
           )}

@@ -244,10 +244,22 @@ export function useDiceLeaderboard() {
   return { entries, loading, refresh: fetch }
 }
 
+const PENDING_TX_KEY = 'dice-pending-txid'
+
 export function useRollDice(address: string | null) {
   const [rolling, setRolling] = useState(false)
-  const [txId, setTxId] = useState<string | null>(null)
+  // Restore pending txId from sessionStorage so a page refresh doesn't lose it
+  // (blockchain confirmation takes minutes — state would be lost otherwise)
+  const [txId, setTxIdState] = useState<string | null>(() =>
+    sessionStorage.getItem(PENDING_TX_KEY),
+  )
   const [error, setError] = useState<string | null>(null)
+
+  const setTxId = useCallback((id: string | null) => {
+    if (id) sessionStorage.setItem(PENDING_TX_KEY, id)
+    else sessionStorage.removeItem(PENDING_TX_KEY)
+    setTxIdState(id)
+  }, [])
 
   const roll = useCallback(async (choice: number) => {
     if (!address) { setError('Connect your wallet first'); return }
@@ -264,7 +276,9 @@ export function useRollDice(address: string | null) {
       onFinish: (data) => { setTxId(data.txId); setRolling(false) },
       onCancel: () => setRolling(false),
     })
-  }, [address])
+  }, [address, setTxId])
 
-  return { roll, rolling, txId, error, clearError: () => setError(null) }
+  const clearPendingTx = useCallback(() => setTxId(null), [setTxId])
+
+  return { roll, rolling, txId, error, clearError: () => setError(null), clearPendingTx }
 }
