@@ -87,9 +87,13 @@ function buildGameEvent(
   const base = { txId, sender, success, gameId, functionName }
 
   if (gameId === 'dice-game' && functionName === 'roll-dice') {
-    // args[0] = user-choice, args[1] = fee-amount
     const userChoice = parseArg(args[0])
-    return { ...base, userChoice }
+    // Parse result tuple: (ok {dice-result: uN, won: bool, points-earned: uN, ...})
+    const result = tx.metadata?.result?.repr ?? ''
+    const diceResult = parseReprField(result, 'dice-result')
+    const won = parseReprBool(result, 'won')
+    const pointsEarned = parseReprField(result, 'points-earned')
+    return { ...base, userChoice, diceResult, won, pointsEarned }
   }
 
   if (gameId === 'coin-flip' && functionName === 'flip-coin') {
@@ -103,8 +107,18 @@ function buildGameEvent(
 
 function parseArg(arg: any): number | string | null {
   if (!arg) return null
-  // args format: { name, repr: "u3", type: "uint" }
   const repr: string = arg.repr ?? arg.value ?? String(arg)
   if (repr.startsWith('u')) return parseInt(repr.slice(1))
   return repr
+}
+
+// Parse a uint field from a Clarity repr string like "(ok {dice-result: u3, won: true, ...})"
+function parseReprField(repr: string, field: string): number | null {
+  const match = repr.match(new RegExp(`${field}:\\s*u(\\d+)`))
+  return match ? parseInt(match[1]) : null
+}
+
+function parseReprBool(repr: string, field: string): boolean | null {
+  const match = repr.match(new RegExp(`${field}:\\s*(true|false)`))
+  return match ? match[1] === 'true' : null
 }

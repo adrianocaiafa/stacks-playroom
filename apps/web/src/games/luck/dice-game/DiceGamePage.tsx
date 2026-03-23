@@ -2,7 +2,8 @@ import { useState, useCallback } from 'react'
 import { useStacksWallet } from '../../../hooks/useStacksWallet'
 import { useGameEvents } from '../../../hooks/useGameEvents'
 import { LiveEventToast } from '../../../components/LiveEventToast'
-import type { BaseGameEvent } from '@stacks-playroom/shared'
+import { DiceResultOverlay } from '../../../components/DiceResultOverlay'
+import type { BaseGameEvent, DiceRollEvent } from '@stacks-playroom/shared'
 import {
   useDiceGlobalStats,
   useDiceUserStats,
@@ -34,10 +35,18 @@ function RefreshButton({ onClick, loading }: { onClick: () => void; loading: boo
   )
 }
 
+interface OverlayData {
+  txId: string
+  userChoice: number | null
+  diceResult: number | null
+  won: boolean | null
+}
+
 export function DiceGamePage() {
   const { address } = useStacksWallet()
   const [selected, setSelected] = useState<number | null>(null)
   const [liveEvent, setLiveEvent] = useState<BaseGameEvent | null>(null)
+  const [overlay, setOverlay] = useState<OverlayData | null>(null)
 
   const { stats: global, loading: globalLoading, refresh: refreshGlobal } = useDiceGlobalStats()
   const { stats: user, loading: userLoading, refresh: refreshUser } = useDiceUserStats(address)
@@ -45,16 +54,32 @@ export function DiceGamePage() {
   const { entries, loading: lbLoading, refresh: refreshLb } = useDiceLeaderboard()
   const { roll, rolling, txId, error } = useRollDice(address)
 
-  // SSE — refresh data when any on-chain event arrives
-  const handleLiveEvent = useCallback((event: BaseGameEvent) => {
-    setLiveEvent(event)
+  const refreshAll = useCallback(() => {
     setTimeout(() => {
       refreshGlobal()
       refreshUser()
       refreshHistory()
       refreshLb()
-    }, 3000) // wait 3s for chain to settle before querying
+    }, 3000)
   }, [refreshGlobal, refreshUser, refreshHistory, refreshLb])
+
+  // SSE — if the event is the user's own tx show the overlay, otherwise show toast
+  const handleLiveEvent = useCallback((event: BaseGameEvent) => {
+    refreshAll()
+
+    const diceEvent = event as DiceRollEvent
+    // txId from useRollDice is the pending tx the user submitted
+    if (txId && event.txId.toLowerCase() === txId.toLowerCase()) {
+      setOverlay({
+        txId: event.txId,
+        userChoice: diceEvent.userChoice ?? null,
+        diceResult: diceEvent.diceResult ?? null,
+        won: diceEvent.won ?? null,
+      })
+    } else {
+      setLiveEvent(event)
+    }
+  }, [txId, refreshAll])
 
   useGameEvents('dice-game', handleLiveEvent)
 
@@ -71,6 +96,15 @@ export function DiceGamePage() {
   return (
     <div className="max-w-5xl mx-auto space-y-8">
       <LiveEventToast event={liveEvent} />
+      {overlay && (
+        <DiceResultOverlay
+          userChoice={overlay.userChoice}
+          diceResult={overlay.diceResult}
+          won={overlay.won}
+          txId={overlay.txId}
+          onClose={() => setOverlay(null)}
+        />
+      )}
       {/* Header */}
       <div className="text-center">
         <h1 className="text-4xl font-bold text-white mb-2">🎲 Dice Game</h1>

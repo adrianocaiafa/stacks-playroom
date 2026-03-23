@@ -23,7 +23,10 @@ export interface BaseGameEvent {
 export interface DiceRollEvent extends BaseGameEvent {
   gameId: 'dice-game';
   functionName: 'roll-dice';
-  userChoice: number;
+  userChoice: number | null;
+  diceResult: number | null;
+  won: boolean | null;
+  pointsEarned: number | null;
 }
 
 export type GameEvent = DiceRollEvent | BaseGameEvent;
