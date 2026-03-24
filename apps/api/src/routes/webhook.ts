@@ -106,6 +106,17 @@ function buildGameEvent(
     return { ...base, userChoice, coinResult, won, pointsEarned }
   }
 
+  if (gameId === 'mastermind' && (functionName === 'guess' || functionName === 'give-up')) {
+    const repr = tx.metadata?.result?.repr ?? ''
+    const exactMatches = parseReprField(repr, 'exact-matches')
+    const partialMatches = parseReprField(repr, 'partial-matches')
+    const gameResult = parseReprStringAscii(repr, 'result')
+    const score = parseReprField(repr, 'score')
+    const attemptsUsed = parseReprField(repr, 'attempts-used')
+    const secretCode = parseReprList(repr, 'secret-code')
+    return { ...base, exactMatches, partialMatches, result: gameResult, score, attemptsUsed, secretCode }
+  }
+
   if (gameId === 'rock-paper-scissors' && functionName === 'play-game') {
     const userChoice = parseArg(args[0])
     const result = tx.metadata?.result?.repr ?? ''
@@ -143,4 +154,11 @@ function parseReprBool(repr: string, field: string): boolean | null {
 function parseReprStringAscii(repr: string, field: string): string | null {
   const match = repr.match(new RegExp(`\\(${field}\\s+"([^"]+)"\\)`))
   return match ? match[1] : null
+}
+
+// Parse an optional list of uints: (secret-code (some (list u1 u2 u3 u4 u5))) → [1,2,3,4,5]
+function parseReprList(repr: string, field: string): number[] | null {
+  const match = repr.match(new RegExp(`\\(${field}\\s+\\(some\\s+\\(list\\s+([^)]+)\\)\\)\\)`))
+  if (!match) return null
+  return match[1].trim().split(/\s+/).map((s) => parseInt(s.replace('u', '')))
 }

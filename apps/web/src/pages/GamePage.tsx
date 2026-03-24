@@ -3,11 +3,13 @@ import { GAMES } from '../data/games'
 import { DiceGamePage } from '../games/luck/dice-game/DiceGamePage'
 import { CoinFlipPage } from '../games/luck/coin-flip/CoinFlipPage'
 import { RPSPage } from '../games/casual/rock-paper-scissors/RPSPage'
+import { MastermindPage } from '../games/logic/mastermind/MastermindPage'
 
 export const GAME_COMPONENTS: Record<string, React.ComponentType> = {
   'dice-game': DiceGamePage,
   'coin-flip': CoinFlipPage,
   'rock-paper-scissors': RPSPage,
+  'mastermind': MastermindPage,
 }
 
 export function GamePage() {

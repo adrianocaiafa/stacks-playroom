@@ -47,4 +47,15 @@ export interface RPSGameEvent extends BaseGameEvent {
   pointsEarned: number | null;
 }
 
-export type GameEvent = DiceRollEvent | CoinFlipEvent | RPSGameEvent | BaseGameEvent;
+export interface MastermindGuessEvent extends BaseGameEvent {
+  gameId: 'mastermind';
+  functionName: 'guess' | 'give-up';
+  exactMatches: number | null;
+  partialMatches: number | null;
+  result: 'victory' | 'game-over' | 'continue' | null;
+  score: number | null;
+  secretCode: number[] | null;
+  attemptsUsed: number | null;
+}
+
+export type GameEvent = DiceRollEvent | CoinFlipEvent | RPSGameEvent | MastermindGuessEvent | BaseGameEvent;
