@@ -91,6 +91,13 @@ export function MastermindPage() {
     }
   }, [chainAttempts, attemptsLoading])
 
+  // Auto-clear stale 'start' pending once we know the active game exists
+  useEffect(() => {
+    if (pending?.type === 'start' && activeGame !== undefined) {
+      clearPending()
+    }
+  }, [pending, activeGame, clearPending])
+
   // Restore pending guess row if page was reloaded with a pending tx
   useEffect(() => {
     if (pending?.type === 'guess' && pending.code) {
@@ -392,14 +399,14 @@ export function MastermindPage() {
               <div className="flex gap-3">
                 <button
                   onClick={handleSubmitGuess}
-                  disabled={anyPending || inputDigits.some((d) => d === null)}
+                  disabled={hasPendingGuess || hasPendingGiveUp || inputDigits.some((d) => d === null)}
                   className="flex-1 py-3 bg-orange-500 text-white font-semibold rounded-lg hover:bg-orange-600 transition disabled:opacity-40"
                 >
                   Submit Guess
                 </button>
                 <button
                   onClick={handleGiveUp}
-                  disabled={anyPending}
+                  disabled={hasPendingGuess || hasPendingGiveUp}
                   className="px-4 py-3 bg-gray-800 text-gray-400 rounded-lg hover:bg-gray-700 hover:text-red-400 transition disabled:opacity-40 text-sm"
                 >
                   Give Up
