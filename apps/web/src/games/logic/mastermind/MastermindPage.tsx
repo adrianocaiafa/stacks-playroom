@@ -71,9 +71,9 @@ interface OverlayData {
 export function MastermindPage() {
   const { address } = useStacksWallet()
 
-  const { activeGame, loading: activeLoading, refresh: refreshActive } = useMastermindActiveGame(address)
+  const { activeGame, refresh: refreshActive } = useMastermindActiveGame(address)
   const attemptsUsed = activeGame?.attemptsUsed ?? 0
-  const { attempts: chainAttempts, loading: attemptsLoading, refresh: refreshAttempts } = useMastermindAttempts(address, attemptsUsed)
+  const { attempts: chainAttempts, loading: attemptsLoading } = useMastermindAttempts(address, attemptsUsed)
   const { stats, loading: statsLoading, refresh: refreshStats } = useMastermindPlayerStats(address)
   const { entries, loading: lbLoading, refresh: refreshLb } = useMastermindLeaderboard()
   const { pending, startGame, submitGuess, giveUp, clearPending, error } = useMastermindActions(address)
