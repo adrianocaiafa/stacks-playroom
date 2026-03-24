@@ -91,12 +91,37 @@ export function MastermindPage() {
     }
   }, [chainAttempts, attemptsLoading])
 
-  // Auto-clear stale 'start' pending once we know the active game exists
+  // Auto-clear stale pending based on chain state
   useEffect(() => {
-    if (pending?.type === 'start' && activeGame !== undefined) {
+    if (!pending || activeGame === undefined) return
+
+    // 'start' pending: game already active → confirmed
+    if (pending.type === 'start') {
       clearPending()
+      return
     }
-  }, [pending, activeGame, clearPending])
+
+    // 'give-up' pending: no active game → confirmed
+    if (pending.type === 'give-up' && activeGame === null) {
+      clearPending()
+      return
+    }
+
+    // 'guess' pending: no active game means it was the last guess (game-over/victory) → clear
+    if (pending.type === 'guess' && activeGame === null) {
+      clearPending()
+      return
+    }
+
+    // 'guess' pending: if its code is already in chain attempts → confirmed
+    if (pending.type === 'guess' && pending.code && !attemptsLoading && chainAttempts.length > 0) {
+      const codeKey = JSON.stringify(pending.code)
+      const alreadyOnChain = chainAttempts.some((a) => JSON.stringify(a.code) === codeKey)
+      if (alreadyOnChain) {
+        clearPending()
+      }
+    }
+  }, [pending, activeGame, chainAttempts, attemptsLoading, clearPending])
 
   // Restore pending guess row if page was reloaded with a pending tx
   useEffect(() => {
@@ -395,6 +420,16 @@ export function MastermindPage() {
 
               {inputError && <p className="text-red-400 text-sm mb-3">{inputError}</p>}
               {error && <p className="text-red-400 text-sm mb-3">{error}</p>}
+
+              {/* Escape hatch if pending got stuck */}
+              {(hasPendingGuess || hasPendingGiveUp) && (
+                <p className="text-xs text-gray-600 mb-2">
+                  Waiting for confirmation…{' '}
+                  <button onClick={clearPending} className="text-orange-600 hover:text-orange-400 underline">
+                    stuck? clear pending
+                  </button>
+                </p>
+              )}
 
               <div className="flex gap-3">
                 <button
